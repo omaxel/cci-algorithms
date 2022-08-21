@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace CCI.Algorithms
@@ -30,16 +31,15 @@ namespace CCI.Algorithms
         public static void CheckPermutation(string str1, string str2, bool expected)
         {
             Assert.Equal(expected, CheckPermutation1(str1, str2));
-            // Assert.Equal(expected, IsUnique2(str));
+            Assert.Equal(expected, CheckPermutation2(str1, str2));
         }
 
         /**
          * Solution using an HashSet.
-         * T = O(N + M + C)
+         * T = O(N)
          * S = O(C + D)
          *
-         * N = length of the first input string
-         * M = length of the second input string
+         * N = length of the input strings. If the strings have different lengths, then T = O(1).
          *
          * C = unique characters in first input string
          * D = unique characters in second input string
@@ -49,46 +49,74 @@ namespace CCI.Algorithms
             if (str1.Length != str2.Length)
                 return false;
 
-            var longestStrDict = new Dictionary<char, int>();
-            var shortestStrDict = new Dictionary<char, int>();
+            var dict = new Dictionary<char, int>();
 
-            var longestStr = str1.Length > str2.Length ? str1 : str2;
-            var shortestStr = str1.Length > str2.Length ? str2 : str1;
-
-            foreach (var character in shortestStr)
+            for (var i = 0; i < str1.Length; i++)
             {
-                if (shortestStrDict.TryGetValue(character, out var count))
-                    shortestStrDict[character] = count + 1;
-                else
-                    shortestStrDict.Add(character, 1);
+                var char1 = str1[i];
+                var char2 = str2[i];
+
+                if (char1 == char2)
+                    continue;
+
+                UpdateDictCount(dict, char1, 1);
+                UpdateDictCount(dict, char2, -1);
             }
 
-            foreach (var character in longestStr)
+            return dict.Keys.Count == 0;
+        }
+
+        private static void UpdateDictCount(IDictionary<char, int> dict, char c, int add)
+        {
+            if (dict.TryGetValue(c, out var count))
             {
-                if (!shortestStrDict.TryGetValue(character, out var shortestStrCharacterCount))
-                    return false;
-
-                if (longestStrDict.TryGetValue(character, out var count))
+                var newCount = count + add;
+                if (newCount == 0)
                 {
-                    if (count + 1 > shortestStrCharacterCount)
-                        return false;
-
-                    longestStrDict[character] = count + 1;
+                    dict.Remove(c);
                 }
                 else
-                    longestStrDict.Add(character, 1);
+                {
+                    dict[c] = newCount;
+                }
+
+                return;
             }
 
-            // At this point, shortestStrDict and longestStrDict contain the same keys.
-            // We have to check if, for each key, the longestStrDict has the same count as the shortestStrDict.
+            dict.Add(c, add);
+        }
 
-            foreach (var key in shortestStrDict.Keys)
+        /**
+         * Solution using an HashSet.
+         * T = O(N + Nlog(N) + N + Nlog(N) + N) = O(Nlog(N))
+         * S = O(N + N) = O(N) See notes below
+         *
+         * N = length of the input strings. If the strings have different lengths, then T = O(1).
+         *
+         * Notes:
+         * If C# would have a method to sort strings in place, this algorithm
+         *  - wouldn't need to copy the string to an array first;
+         *  - wouldn't use any additional space since the strings wouldn't be converted to arrays first.
+         */
+        private static bool CheckPermutation2(string str1, string str2)
+        {
+            if (str1.Length != str2.Length)
+                return false;
+
+            var str1Array = str1.ToCharArray();
+            Array.Sort(str1Array);
+
+            var str2Array = str2.ToCharArray();
+            Array.Sort(str2Array);
+
+            for (var i = 0; i < str1.Length; i++)
             {
-                if (longestStrDict[key] != shortestStrDict[key])
+                if (str1Array[i] != str2Array[i])
                     return false;
             }
 
             return true;
         }
+
     }
 }
