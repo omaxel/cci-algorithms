@@ -30,8 +30,8 @@ namespace CCI.Algorithms
         [MemberData(nameof(Data))]
         public static void CheckPermutation(string str1, string str2, bool expected)
         {
-            Assert.Equal(expected, CheckPermutation1(str1, str2));
-            Assert.Equal(expected, CheckPermutation2(str1, str2));
+            Assert.Equal(expected, CheckPermutation1(str1.ToCharArray(), str2.ToCharArray()));
+            Assert.Equal(expected, CheckPermutation2(str1.ToCharArray(), str2.ToCharArray()));
         }
 
         /**
@@ -44,7 +44,7 @@ namespace CCI.Algorithms
          * C = unique characters in first input string
          * D = unique characters in second input string
          */
-        private static bool CheckPermutation1(string str1, string str2)
+        private static bool CheckPermutation1(char[] str1, char[] str2)
         {
             if (str1.Length != str2.Length)
                 return false;
@@ -87,36 +87,26 @@ namespace CCI.Algorithms
         }
 
         /**
-         * Solution using an HashSet.
-         * T = O(N + Nlog(N) + N + Nlog(N) + N) = O(Nlog(N))
-         * S = O(N + N) = O(N) See notes below
+         * T = O(Nlog(N) + Nlog(N) + N) = O(Nlog(N))
+         * S = O(1)
          *
          * N = length of the input strings. If the strings have different lengths, then T = O(1).
-         *
-         * Notes:
-         * If C# would have a method to sort strings in place, this algorithm
-         *  - wouldn't need to copy the string to an array first;
-         *  - wouldn't use any additional space since the strings wouldn't be converted to arrays first.
          */
-        private static bool CheckPermutation2(string str1, string str2)
+        private static bool CheckPermutation2(char[] str1, char[] str2)
         {
             if (str1.Length != str2.Length)
                 return false;
 
-            var str1Array = str1.ToCharArray();
-            Array.Sort(str1Array);
-
-            var str2Array = str2.ToCharArray();
-            Array.Sort(str2Array);
+            Array.Sort(str1);
+            Array.Sort(str2);
 
             for (var i = 0; i < str1.Length; i++)
             {
-                if (str1Array[i] != str2Array[i])
+                if (str1[i] != str2[i])
                     return false;
             }
 
             return true;
         }
-
     }
 }
