@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -25,6 +24,7 @@ namespace CCI.Algorithms
                 new object[] {"  Mr John Smith        ", 15, "%20%20Mr%20John%20Smith"},
                 new object[] {"  Mr John Smith              ", 17, "%20%20Mr%20John%20Smith%20%20"},
                 new object[] {"Mr  John  Smith        ", 15, "Mr%20%20John%20%20Smith"},
+                new object[] {"Mr  John  Smith                   ", 15, "Mr%20%20John%20%20Smith           "},
                 new object[] {"a", 1, "a"},
                 new object[] {"abc", 3, "abc"},
             };
@@ -52,10 +52,14 @@ namespace CCI.Algorithms
 
             var result = new StringBuilder();
 
-            for (var i = 0; i < length; i++)
+            var count = str.Length;
+            for (var i = 0; i < count; i++)
             {
-                if (str[i] == ' ')
+                if (str[i] == ' ' && i < length)
+                {
                     result.Append("%20");
+                    count -= 2;
+                }
                 else
                     result.Append(str[i]);
             }
@@ -74,7 +78,9 @@ namespace CCI.Algorithms
             if (str.Length == length)
                 return str;
 
-            var writeIndex = str.Length - 1;
+            var spaceCount = GetSpacesCount(str, length);
+
+            var writeIndex = length - 1 + (spaceCount * 2);
 
             for (var readIndex = length - 1; readIndex >= 0; readIndex--)
             {
@@ -83,22 +89,30 @@ namespace CCI.Algorithms
                 if (readChar == ' ')
                 {
                     str[writeIndex] = '0';
-                    writeIndex--;
-
-                    str[writeIndex] = '2';
-                    writeIndex--;
-
-                    str[writeIndex] = '%';
+                    str[writeIndex - 1] = '2';
+                    str[writeIndex - 2] = '%';
+                    writeIndex -= 3;
                 }
                 else
                 {
                     str[writeIndex] = readChar;
+                    writeIndex--;
                 }
-
-                writeIndex--;
             }
 
             return str;
+        }
+
+        private static int GetSpacesCount(char[] str, int maxLength)
+        {
+            var result = 0;
+            for (var i = 0; i < maxLength; i++)
+            {
+                if (str[i] == ' ')
+                    result++;
+            }
+
+            return result;
         }
     }
 }
