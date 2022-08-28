@@ -9,6 +9,8 @@ namespace CCI.Algorithms
         public static IEnumerable<object[]> Data =>
             new List<object[]>
             {
+                new object[] {"", "", true},
+                new object[] {"a", "a", true},
                 new object[] {"pale", "pale", true},
 
                 // Insert one
